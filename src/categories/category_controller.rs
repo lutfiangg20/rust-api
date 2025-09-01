@@ -2,7 +2,7 @@ use actix_web::{HttpResponse, Responder, get, post, web};
 
 use crate::{
     categories::{
-        category_model::{Category, CreateCategory},
+        category_model::{CreateCategory, Product},
         category_service,
     },
     common::model::WebResponse,
@@ -11,7 +11,7 @@ use crate::{
 #[get("")]
 pub async fn categories() -> impl Responder {
     let categories = category_service::get_all_categories().await;
-    let response: WebResponse<Vec<Category>> = WebResponse {
+    let response: WebResponse<Vec<Product>> = WebResponse {
         data: categories,
         message: "success".to_string(),
     };

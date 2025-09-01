@@ -1,9 +1,9 @@
 use crate::categories::{
-    category_model::{Category, CreateCategory},
+    category_model::{CreateCategory, Product},
     category_repository,
 };
 
-pub async fn get_all_categories() -> Vec<Category> {
+pub async fn get_all_categories() -> Vec<Product> {
     category_repository::Repo::new()
         .await
         .find_all()
