@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: rust-api-postgre
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    volumes:
+      - rust-api_data:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+
+  adminer:
+    image: adminer
+    container_name: adminer_rust_api
+    ports:
+      - 4001:8080
+
+volumes:
+  rust-api_data:
