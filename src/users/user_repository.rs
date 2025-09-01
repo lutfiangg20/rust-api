@@ -1,7 +1,7 @@
 use sqlx::PgPool;
 
 use crate::{
-    db::init_pg_pool,
+    db::{init_pg_pool, pool},
     users::user_model::{CreateUser, User},
 };
 
@@ -11,8 +11,7 @@ pub struct Repo {
 
 impl Repo {
     pub async fn new() -> Self {
-        let pool = init_pg_pool().await.expect("no pg pool");
-        Self { db: pool }
+        Self { db: pool() }
     }
 
     pub async fn find_all(&self) -> Result<Vec<User>, sqlx::Error> {

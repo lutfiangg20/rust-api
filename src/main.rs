@@ -1,6 +1,8 @@
 use actix_web::{App, HttpServer};
 use dotenvy::dotenv;
 
+use crate::db::init_pg_pool;
+
 mod categories;
 mod common;
 mod db;
@@ -9,6 +11,8 @@ mod users;
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     dotenv().ok();
+
+    init_pg_pool().await;
 
     HttpServer::new(|| {
         App::new()

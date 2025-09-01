@@ -2,7 +2,7 @@ use sqlx::PgPool;
 
 use crate::{
     categories::category_model::{Category, CreateCategory},
-    db::init_pg_pool,
+    db::pool,
 };
 
 pub struct Repo {
@@ -11,8 +11,7 @@ pub struct Repo {
 
 impl Repo {
     pub async fn new() -> Self {
-        let pool = init_pg_pool().await.expect("no pg pool");
-        Self { db: pool }
+        Self { db: pool() }
     }
 
     pub async fn find_all(&self) -> Result<Vec<Category>, sqlx::Error> {
