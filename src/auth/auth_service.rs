@@ -50,6 +50,12 @@ pub async fn guard(
     req: ServiceRequest,
     next: Next<impl MessageBody>,
 ) -> Result<ServiceResponse<impl MessageBody>, Error> {
-    println!("guard");
+    if let Some(auth_header) = req.headers().get("Authorization") {
+        if let Ok(auth_str) = auth_header.to_str() {
+            let parts: Vec<&str> = auth_str.split(" ").collect();
+            let token = parts[1];
+            println!("auth_str: {}", token);
+        }
+    }
     next.call(req).await
 }
