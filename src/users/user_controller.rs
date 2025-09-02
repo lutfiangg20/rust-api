@@ -30,7 +30,6 @@ pub async fn create_user(body: web::Json<CreateUser>) -> impl Responder {
         email: body.email.to_owned(),
         password: body.password.to_owned(),
     };
-    println!("{:?}", create_user);
 
     let user = user_service::create_user(create_user).await;
     let response: WebResponse<String> = WebResponse {

@@ -1,3 +1,5 @@
+use bcrypt::hash;
+
 use crate::users::{
     user_model::{CreateUser, User},
     user_repository,
@@ -12,9 +14,21 @@ pub async fn get_all_users() -> Vec<User> {
 }
 
 pub async fn create_user(user: CreateUser) -> String {
+    // let hash_string = "testargonhashencryptpassword";
+
+    let password_hash = tokio::task::spawn_blocking(move || hash(user.password, 5).unwrap())
+        .await
+        .unwrap();
+
+    let new_user = CreateUser {
+        name: user.name.to_owned(),
+        email: user.email.to_owned(),
+        password: password_hash,
+    };
+
     user_repository::Repo::new()
         .await
-        .insert(user)
+        .insert(new_user)
         .await
         .expect("error create user");
 

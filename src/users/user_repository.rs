@@ -1,7 +1,7 @@
 use sqlx::PgPool;
 
 use crate::{
-    db::{init_pg_pool, pool},
+    db::pool,
     users::user_model::{CreateUser, User},
 };
 
