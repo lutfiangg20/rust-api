@@ -15,7 +15,7 @@ impl Repo {
     }
 
     pub async fn find_all(&self) -> Result<Vec<User>, sqlx::Error> {
-        let users = sqlx::query_as::<_, User>("select id,name,email from users")
+        let users = sqlx::query_as::<_, User>("select id,name,email,phone from users")
             .fetch_all(&self.db)
             .await
             .expect("repo user error");
@@ -23,10 +23,11 @@ impl Repo {
     }
 
     pub async fn insert(&self, user: CreateUser) -> Result<(), sqlx::Error> {
-        sqlx::query("insert into users (name,email,password) values ($1,$2,$3)")
+        sqlx::query("insert into users (name,email,password,phone) values ($1,$2,$3,$4)")
             .bind(user.name)
             .bind(user.email)
             .bind(user.password)
+            .bind(user.phone)
             .execute(&self.db)
             .await?;
 

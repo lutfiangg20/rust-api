@@ -15,16 +15,27 @@ impl Repo {
     }
 
     pub async fn find_all(&self) -> Result<Vec<Product>, sqlx::Error> {
-        let categories = sqlx::query_as::<_, Product>("select id,name,price from products")
-            .fetch_all(&self.db)
-            .await
-            .expect("repo category error");
-        Ok(categories)
+        let products = sqlx::query_as::<_, Product>(
+            r#"
+            SELECT 
+            p.id as id,
+            p.name as name,
+            p.price as price,
+            c.name as category
+            FROM products p LEFT JOIN categories c ON c.id = p.category_id
+        "#,
+        )
+        .fetch_all(&self.db)
+        .await
+        .expect("repo category error");
+        Ok(products)
     }
 
     pub async fn insert(&self, product: CreateProduct) -> Result<(), sqlx::Error> {
-        sqlx::query("insert into products (name,price) values ($1,$2)")
+        sqlx::query("insert into products (name,price,category_id) values ($1,$2,$3)")
             .bind(product.name)
+            .bind(product.price)
+            .bind(product.category_id)
             .execute(&self.db)
             .await?;
 

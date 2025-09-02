@@ -24,6 +24,7 @@ pub async fn create_user(user: CreateUser) -> String {
         name: user.name.to_owned(),
         email: user.email.to_owned(),
         password: password_hash,
+        phone: user.phone.to_owned(),
     };
 
     user_repository::Repo::new()

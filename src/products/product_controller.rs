@@ -20,14 +20,9 @@ pub async fn products() -> impl Responder {
 
 #[post("")]
 pub async fn create_product(body: web::Json<CreateProduct>) -> impl Responder {
-    let create_product = CreateProduct {
-        name: body.name.to_owned(),
-        price: body.price.to_owned(),
-        category_id: body.category_id.to_owned(),
-    };
-    println!("{:?}", create_product);
+    println!("{:?}", body);
 
-    let user = product_service::create_product(create_product).await;
+    let user = product_service::create_product(body.into_inner()).await;
     let response: WebResponse<String> = WebResponse {
         data: user,
         message: "success".to_string(),
