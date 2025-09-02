@@ -9,11 +9,6 @@ use crate::{
     },
 };
 
-#[get("/")]
-pub async fn hello() -> impl Responder {
-    HttpResponse::Ok().body("hello wolrd")
-}
-
 #[get("")]
 pub async fn users() -> impl Responder {
     let users = user_service::get_all_users().await;

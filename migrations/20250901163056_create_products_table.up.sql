@@ -3,6 +3,7 @@ CREATE TABLE products (
   id serial PRIMARY KEY,
   name text not null,
   price int not null,
+  stock int not null default 0,
   category_id int not null,
   created_at timestamp default now(),
   constraint fk_category

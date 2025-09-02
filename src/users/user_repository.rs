@@ -2,7 +2,7 @@ use sqlx::PgPool;
 
 use crate::{
     db::pool,
-    users::user_model::{CreateUser, User},
+    users::user_model::{CreateUser, User, UserWithPassword},
 };
 
 pub struct Repo {
@@ -20,6 +20,21 @@ impl Repo {
             .await
             .expect("repo user error");
         Ok(users)
+    }
+
+    pub async fn find_by_email(&self, email: String) -> Result<UserWithPassword, sqlx::Error> {
+        let user = sqlx::query_as::<_, UserWithPassword>(
+            r#"
+        select id,name,password 
+        from users 
+        where email = $1
+        "#,
+        )
+        .bind(email)
+        .fetch_one(&self.db)
+        .await?;
+
+        Ok(user)
     }
 
     pub async fn insert(&self, user: CreateUser) -> Result<(), sqlx::Error> {

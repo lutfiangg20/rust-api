@@ -1,8 +1,9 @@
-use actix_web::{App, HttpServer};
+use actix_web::{App, HttpServer, middleware::NormalizePath};
 use dotenvy::dotenv;
 
 use crate::db::init_pg_pool;
 
+mod auth;
 mod categories;
 mod common;
 mod db;
@@ -17,9 +18,11 @@ async fn main() -> std::io::Result<()> {
 
     HttpServer::new(|| {
         App::new()
+            .wrap(NormalizePath::trim())
             .service(users::scope())
             .service(categories::scope())
             .service(products::scope())
+            .service(auth::scope())
     })
     .bind(("0.0.0.0", 3000))?
     .run()

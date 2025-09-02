@@ -14,8 +14,6 @@ pub async fn get_all_users() -> Vec<User> {
 }
 
 pub async fn create_user(user: CreateUser) -> String {
-    // let hash_string = "testargonhashencryptpassword";
-
     let password_hash = tokio::task::spawn_blocking(move || hash(user.password, 5).unwrap())
         .await
         .unwrap();
