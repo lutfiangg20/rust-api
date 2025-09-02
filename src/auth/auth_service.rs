@@ -1,3 +1,9 @@
+use actix_web::{
+    Error,
+    body::MessageBody,
+    dev::{ServiceRequest, ServiceResponse},
+    middleware::Next,
+};
 use bcrypt::verify;
 use chrono::{Duration, Utc};
 use jsonwebtoken::{EncodingKey, Header, encode};
@@ -38,4 +44,12 @@ pub async fn generate_token(email: &str) -> Result<String, jsonwebtoken::errors:
         &claims,
         &EncodingKey::from_secret("MY_SECRET".as_ref()),
     )
+}
+
+pub async fn guard(
+    req: ServiceRequest,
+    next: Next<impl MessageBody>,
+) -> Result<ServiceResponse<impl MessageBody>, Error> {
+    println!("guard");
+    next.call(req).await
 }
