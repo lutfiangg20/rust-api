@@ -1,12 +1,14 @@
 use actix_web::{
-    Error,
-    body::MessageBody,
+    Error, HttpResponse,
+    body::BoxBody,
     dev::{ServiceRequest, ServiceResponse},
     middleware::Next,
 };
 use bcrypt::verify;
 use chrono::{Duration, Utc};
-use jsonwebtoken::{EncodingKey, Header, encode};
+use jsonwebtoken::{
+    DecodingKey, EncodingKey, Header, TokenData, Validation, decode, encode, errors,
+};
 
 use crate::{
     auth::auth_model::{Claims, Login},
@@ -48,14 +50,31 @@ pub async fn generate_token(email: &str) -> Result<String, jsonwebtoken::errors:
 
 pub async fn guard(
     req: ServiceRequest,
-    next: Next<impl MessageBody>,
-) -> Result<ServiceResponse<impl MessageBody>, Error> {
-    if let Some(auth_header) = req.headers().get("Authorization") {
-        if let Ok(auth_str) = auth_header.to_str() {
-            let parts: Vec<&str> = auth_str.split(" ").collect();
-            let token = parts[1];
-            println!("auth_str: {}", token);
+    next: Next<BoxBody>,
+) -> Result<ServiceResponse<BoxBody>, Error> {
+    if let Some(Ok(auth_str)) = req.headers().get("Authorization").map(|h| h.to_str())
+        && let Some(token) = auth_str.split_whitespace().nth(1)
+    {
+        match decode_token(token) {
+            Ok(_) => {
+                return next.call(req).await;
+            }
+            Err(_) => {
+                let (req, _pl) = req.into_parts();
+                let res = HttpResponse::Unauthorized().finish();
+                return Ok(ServiceResponse::new(req, res));
+            }
         }
     }
-    next.call(req).await
+    let (req, _pl) = req.into_parts();
+    let res = HttpResponse::Unauthorized().finish();
+    Ok(ServiceResponse::new(req, res))
+}
+
+fn decode_token(jwt: &str) -> Result<TokenData<Claims>, errors::Error> {
+    decode::<Claims>(
+        jwt,
+        &DecodingKey::from_secret("MY_SECRET".as_ref()),
+        &Validation::default(),
+    )
 }
