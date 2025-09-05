@@ -1,0 +1,21 @@
+#[cfg(test)]
+mod db_test {
+    use dotenvy::dotenv;
+
+    use crate::{
+        db::{init_pg_pool, pool},
+        orders::order_repository,
+    };
+
+    async fn test_get_orders() {
+        dotenv().ok();
+
+        init_pg_pool().await;
+        let repo = order_repository::Repo::new().await;
+
+        let orders = repo.find_all().await.expect("repo orders error");
+
+        println!("orders: {%}", { orders });
+        assert!(orders.len() > 0);
+    }
+}

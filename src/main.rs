@@ -7,6 +7,7 @@ mod auth;
 mod categories;
 mod common;
 mod db;
+mod orders;
 mod products;
 mod users;
 
@@ -23,6 +24,7 @@ async fn main() -> std::io::Result<()> {
             .service(categories::scope())
             .service(products::scope())
             .service(auth::scope())
+            .service(orders::scope())
     })
     .bind(("0.0.0.0", 3000))?
     .run()
