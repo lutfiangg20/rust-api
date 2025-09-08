@@ -31,6 +31,25 @@ impl Repo {
         Ok(products)
     }
 
+    pub async fn find_by_id(&self, id: i32) -> Result<Product, sqlx::Error> {
+        let product = sqlx::query_as::<_, Product>(
+            r#"
+            SELECT 
+            p.id as id,
+            p.name as name,
+            p.price as price,
+            c.name as category
+            FROM products p LEFT JOIN categories c ON c.id = p.category_id
+            WHERE p.id = $1
+        "#,
+        )
+        .bind(id)
+        .fetch_one(&self.db)
+        .await
+        .expect("repo category error");
+        Ok(product)
+    }
+
     pub async fn insert(&self, product: CreateProduct) -> Result<(), sqlx::Error> {
         sqlx::query("insert into products (name,price,category_id) values ($1,$2,$3)")
             .bind(product.name)

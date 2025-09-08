@@ -10,6 +10,9 @@ pub mod user_service;
 pub fn scope() -> impl actix_web::dev::HttpServiceFactory {
     web::scope("/users")
         .service(user_controller::create_user)
-        // .wrap(from_fn(auth::auth_service::guard))
-        .service(user_controller::users)
+        .service(
+            web::scope("")
+                .wrap(from_fn(auth::auth_service::guard))
+                .service(user_controller::users),
+        )
 }

@@ -3,15 +3,20 @@ use sqlx::PgPool;
 use crate::{
     db::pool,
     orders::order_model::{CreateOrder, CreateOrderItem, OrderQuery},
+    products::product_repository,
 };
 
 pub struct Repo {
     db: PgPool,
+    product_repo: product_repository::Repo,
 }
 
 impl Repo {
     pub async fn new() -> Self {
-        Self { db: pool() }
+        Self {
+            db: pool(),
+            product_repo: product_repository::Repo::new().await,
+        }
     }
 
     pub async fn find_all(&self) -> Result<Vec<OrderQuery>, sqlx::Error> {
@@ -73,7 +78,7 @@ impl Repo {
         let id: i32 =
             sqlx::query_scalar("insert into orders (user_id,status) values ($1,$2) returning id")
                 .bind(order.user_id)
-                .bind(order.status)
+                .bind("pending".to_string())
                 .fetch_one(&self.db)
                 .await?;
 
@@ -87,6 +92,8 @@ impl Repo {
     ) -> Result<(), sqlx::Error> {
         let tx = self.db.begin().await?;
 
+        let product = self.product_repo.find_by_id(id).await?;
+
         for order in orders {
             sqlx::query(
                 "insert into order_items (order_id,product_id,quantity,price) values ($1,$2,$3,$4)",
@@ -94,7 +101,7 @@ impl Repo {
             .bind(id)
             .bind(order.product_id)
             .bind(order.quantity)
-            .bind(order.price)
+            .bind(product.price * order.quantity)
             .execute(&self.db)
             .await?;
         }

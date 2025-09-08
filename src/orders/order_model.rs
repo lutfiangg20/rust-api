@@ -40,7 +40,6 @@ pub struct OrderQuery {
 pub struct CreateOrder {
     #[validate(range(min = 1, message = "user_id is not valid"))]
     pub user_id: i32,
-    pub status: String,
     pub items: Vec<CreateOrderItem>,
 }
 
@@ -49,5 +48,4 @@ pub struct CreateOrderItem {
     // pub order_id: i32,
     pub product_id: i32,
     pub quantity: i32,
-    pub price: i32,
 }

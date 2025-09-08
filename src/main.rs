@@ -20,9 +20,9 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(|| {
         App::new()
             .wrap(NormalizePath::trim())
-            .service(users::scope())
             .service(categories::scope())
             .service(products::scope())
+            .service(users::scope())
             .service(auth::scope())
             .service(orders::scope())
     })
