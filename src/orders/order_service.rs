@@ -14,33 +14,34 @@ pub async fn get_all_orders() -> Vec<Order> {
 
     let mut order_map: HashMap<i32, Vec<OrderQuery>> = HashMap::new();
 
-    for order in order_repo.clone() {
+    for order in order_repo {
         order_map.entry(order.id).or_default().push(order);
     }
 
-    order_repo
+    let mut data: Vec<Order> = order_map
         .into_iter()
-        .map(move |order| {
-            let items = order_map
-                .get(&order.id)
-                .cloned()
-                .unwrap_or_default()
-                .iter()
+        .map(|(id, items)| {
+            let name = items.first().map(|o| o.name.clone()).unwrap_or_default();
+            let items = items
+                .into_iter()
                 .map(|item| OrderItem {
-                    product_name: order.product_name.clone().unwrap_or_default(),
+                    product_name: item.product_name.clone().unwrap_or_default(),
                     quantity: item.quantity.unwrap_or_default(),
                     price: item.price.unwrap_or_default(),
                 })
                 .collect();
 
             Order {
-                id: order.id,
-                name: order.name,
+                id,
+                name,
                 status: "pending".to_string(),
                 items,
             }
         })
-        .collect()
+        .collect();
+
+    data.sort_by_key(|d| d.id);
+    data
 }
 
 pub async fn create_order(order: CreateOrder) -> String {
