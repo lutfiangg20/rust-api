@@ -1,9 +1,11 @@
+use std::collections::HashMap;
+
 use sqlx::PgPool;
 
 use crate::{
     db::pool,
     orders::order_model::{CreateOrder, CreateOrderItem, OrderQuery},
-    products::product_repository,
+    products::{product_model::Product, product_repository},
 };
 
 pub struct Repo {
@@ -92,16 +94,28 @@ impl Repo {
     ) -> Result<(), sqlx::Error> {
         let tx = self.db.begin().await?;
 
-        let product = self.product_repo.find_by_id(id).await?;
+        let ids = orders.iter().map(|order| return order.product_id).collect();
+
+        let products: HashMap<i32, Product> = self
+            .product_repo
+            .find_by_ids(ids)
+            .await?
+            .into_iter()
+            .map(|product| (product.id, product))
+            .collect();
 
         for order in orders {
+            let product = products
+                .get(&order.product_id)
+                .ok_or_else(|| sqlx::Error::RowNotFound)?;
+
             sqlx::query(
                 "insert into order_items (order_id,product_id,quantity,price) values ($1,$2,$3,$4)",
             )
             .bind(id)
             .bind(order.product_id)
             .bind(order.quantity)
-            .bind(product.price * order.quantity)
+            .bind(product.price.to_owned() * order.quantity)
             .execute(&self.db)
             .await?;
         }

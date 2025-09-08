@@ -94,7 +94,7 @@ pub async fn create_order(order: CreateOrder) -> String {
     let repo = order_repository::Repo::new().await;
 
     if let Ok(id) = repo.insert(new_order).await {
-        println!("created order: {:?}", id);
+        // println!("created order: {:?}", id);
         repo.insert_order_items(order.items, id)
             .await
             .expect("error create order items");
