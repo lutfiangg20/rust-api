@@ -10,7 +10,7 @@ pub struct Order {
     pub items: Vec<OrderItem>,
 }
 
-#[derive(Debug, FromRow, Serialize)]
+#[derive(Debug, FromRow, Serialize, Clone)]
 pub struct OrderItem {
     pub product_name: String,
     pub quantity: i32,

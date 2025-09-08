@@ -19,6 +19,26 @@ pub async fn orders() -> impl Responder {
     HttpResponse::Ok().json(response)
 }
 
+#[get("/{id}")]
+pub async fn orders_by_id(path: web::Path<i32>) -> impl Responder {
+    match order_service::get_order_by_id(path.into_inner()).await {
+        Ok(data) => {
+            let response: WebResponse<Order> = WebResponse {
+                data,
+                message: "success".to_string(),
+            };
+            HttpResponse::Ok().json(response)
+        }
+        Err(_) => {
+            let response: WebResponse<String> = WebResponse {
+                data: "Data not found".to_string(),
+                message: "success".to_string(),
+            };
+            HttpResponse::Ok().json(response)
+        }
+    }
+}
+
 #[post("")]
 pub async fn create_order(body: web::Json<CreateOrder>) -> impl Responder {
     if let Err(errors) = body.validate() {
